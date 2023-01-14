@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zichengma.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":250,"display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="ZinixOSC, x86 assembly, Operating System This ambitious project is a Unix-like operating system built on the qemu virtual machine. It is the culmination of our operating system design course and is a">
+<meta property="og:type" content="article">
+<meta property="og:title" content="ZinixOS">
+<meta property="og:url" content="https://zichengma.github.io/ZinixOS/index.html">
+<meta property="og:site_name" content="Zicheng Ma&#39;s Blog">
+<meta property="og:description" content="ZinixOSC, x86 assembly, Operating System This ambitious project is a Unix-like operating system built on the qemu virtual machine. It is the culmination of our operating system design course and is a">
+<meta property="og:locale" content="en_US">
+<meta property="og:image" content="https://zichengma.github.io/ZinixOS/Untitled.png">
+<meta property="og:image" content="https://zichengma.github.io/ZinixOS/Untitled1.png">
+<meta property="og:image" content="https://zichengma.github.io/ZinixOS/Untitled2.png">
+<meta property="og:image" content="https://zichengma.github.io/ZinixOS/Untitled3.png">
+<meta property="article:published_time" content="2023-01-14T21:18:10.000Z">
+<meta property="article:modified_time" content="2023-01-14T21:30:47.315Z">
+<meta property="article:author" content="Zicheng Ma">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:image" content="https://zichengma.github.io/ZinixOS/Untitled.png">
+
+<link rel="canonical" href="https://zichengma.github.io/ZinixOS/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>ZinixOS | Zicheng Ma's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Zicheng Ma's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/About-me" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-test">
+
+    <a href="/test-page" rel="section"><i class="fa fa-mask fa-fw"></i>Test</a>
+
+  </li>
+        <li class="menu-item menu-item-course_notes">
+
+    <a href="/CourseNotes" rel="section"><i class="fa fa-book-open fa-fw"></i>Course Notes</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/Projects" rel="section"><i class="fa fa-code fa-fw"></i>Projects</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zichengma.github.io/ZinixOS/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zicheng Ma">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zicheng Ma's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          ZinixOS
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-01-14 15:18:10 / Modified: 15:30:47" itemprop="dateCreated datePublished" datetime="2023-01-14T15:18:10-06:00">2023-01-14</time>
+            </span>
+
+          
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <h1 id="ZinixOS"><a href="#ZinixOS" class="headerlink" title="ZinixOS"></a>ZinixOS</h1><p><strong>C, x86 assembly, Operating System</strong></p>
+<p>This ambitious project is a Unix-like operating system built on the qemu virtual machine. It is the culmination of our operating system design course and is a testament to the hard work and dedication we put into this project. We developed this operating system from the ground up, ensuring that we could support a wide range of features and functionalities. We also added a number of unique features to make it stand out from other operating systems. Ultimately, this project was a great success and we are proud of the hard work and dedication we put into making it a reality. I also found great interest in operating system during this course</p>
+<ul>
+<li>Basic functionalities: Implemented an operating system supporting fundamental features such as scheduling, interrupts, system calls, exceptions, and file systems.</li>
+<li>Additionally, self-designed features were utilised to enhance the system, such as an implicit free list and slab cache to implement a virtual memory allocation system. Furthermore, advanced signals, speaker and hard-disk drivers were also implemented to the system, allowing for an increase in functionality and performance.</li>
+</ul>
+<h2 id="Show-case-of-our-OS"><a href="#Show-case-of-our-OS" class="headerlink" title="Show case of our OS"></a>Show case of our OS</h2><p>Two types of memory management</p>
+<ol>
+<li>Fixed length memory allocation</li>
+<li>Variable length memory allocation</li>
+</ol>
+<h3 id="Fixed-length-—-Slab-Cache"><a href="#Fixed-length-—-Slab-Cache" class="headerlink" title="Fixed length — Slab Cache"></a>Fixed length — Slab Cache</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br></pre></td><td class="code"><pre><span class="line">In this specific implementation, fixed length memory allocation is implemented by two parts, memory management unit and memory unit.</span><br><span class="line">fixed length diagram:</span><br><span class="line">        |memory management unit|  |memory management unit|  |memory management unit|  ..........    |memory unit|  |memory unit| |memory unit| .....</span><br><span class="line">        |next|  ---------------&gt;  |next|  ---------------&gt;  |next|                                      ↑              ↑             ↑</span><br><span class="line">        |ptr|---------------------|ptr|---------------------|ptr|---------------------------------------↑--------------↑-------------↑</span><br></pre></td></tr></table></figure>
+
+<p>Data structure: Linked list</p>
+<ul>
+<li>Slab_Create ( name , size )</li>
+<li>destroy , malloc , free</li>
+<li>Automatically shrinks and grows</li>
+<li>quick and fast to allocate and free</li>
+<li>granularity: 1byte - 4kB-8 bytes</li>
+</ul>
+<h3 id="Variable-length-—-Implicit-free-list"><a href="#Variable-length-—-Implicit-free-list" class="headerlink" title="Variable length — Implicit free list"></a>Variable length — Implicit free list</h3><figure class="highlight c"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br></pre></td><td class="code"><pre><span class="line">On the other hand, variable length memory allocation is implemented very similar to Linux<span class="number">&#x27;</span>s implicit <span class="built_in">free</span> <span class="built_in">list</span> design. </span><br><span class="line">A memory part consists of two parts, memory management unit and real useable memory unit.</span><br><span class="line">Memory management units are held in a linked <span class="built_in">list</span> to track each memory fragments have been allocated.</span><br><span class="line">variable length diagram:</span><br><span class="line">        |memory mangement unit| -&gt; |memory mangement unit| -&gt; |memory mangement unit| -&gt; |memory mangement unit|</span><br><span class="line">        -----------------------    -----------------------    -----------------------    -----------------------</span><br><span class="line">        |                     |    |                     |    |                     |    |                     |</span><br><span class="line">        |   useable memory    |    |   useable memory    |    |   useable memory    |    |   useable memory    |</span><br><span class="line">        |                     |    |                     |    -----------------------    |                     |</span><br><span class="line">        |                     |    -----------------------                               -----------------------</span><br><span class="line">        |                     |</span><br><span class="line">        -----------------------</span><br><span class="line"></span><br><span class="line">Slab cache<span class="number">&#x27;</span>s implementation is based on fixed length memory allocation.</span><br></pre></td></tr></table></figure>
+
+<p>Data structure: Implicit free list</p>
+<ul>
+<li>varmalloc( size )</li>
+<li>flexible: can allocate any size</li>
+<li>granularity: 1byte - 4MB</li>
+</ul>
+<img src="/ZinixOS/Untitled.png" alt="Memory allocation system and memory supevise system" style="zoom:50%;">
+
+<p>Memory allocation system and memory supevise system</p>
+<h2 id="Signal"><a href="#Signal" class="headerlink" title="Signal"></a>Signal</h2><p>Support users to set handler they define</p>
+<p>Support sigreturn and set_handler syscall</p>
+<p>Support five signals:</p>
+<ol>
+<li>SIG_DIV_ZERO</li>
+<li>SIG_SEGFAULT</li>
+<li>SIG_INTERRUPT</li>
+<li>SIG_ALARM</li>
+<li>SIG_USER1</li>
+</ol>
+<img src="/ZinixOS/Untitled1.png" alt="signal tests for our signal implementation" style="zoom:50%;">
+
+<p>signal tests for our signal implementation</p>
+<h2 id="ATA-Hard-Disk-Support-amp-File-System"><a href="#ATA-Hard-Disk-Support-amp-File-System" class="headerlink" title="ATA Hard Disk Support &amp; File System"></a>ATA Hard Disk Support &amp; File System</h2><ul>
+<li><p>Writable file system</p>
+<figure class="highlight jsx"><table><tr><td class="gutter"><pre><span class="line">1</span><br></pre></td><td class="code"><pre><span class="line">write fname contents</span><br></pre></td></tr></table></figure>
+</li>
+<li><p>Persistent Change (after reboot) by saving the change to the hard drive</p>
+</li>
+<li><p>How the file system is loaded and initialized:</p>
+</li>
+</ul>
+<img src="/ZinixOS/Untitled2.png" alt="Untitled" style="zoom: 80%;">
+
+<h2 id="Speaker-Driver"><a href="#Speaker-Driver" class="headerlink" title="Speaker Driver"></a>Speaker Driver</h2><p>Key mapping:</p>
+<p>(C3~E4) ZSXDCVGBHNJM,L.;&#x2F;</p>
+<p>(C4~G5) Q2W3ER5T6Y7UI9O0P[&#x3D;]</p>
+<p>Runs concurrently with any user programs &amp; across terminals</p>
+<img src="/ZinixOS/Untitled3.png" alt="part of the code for our ‘keyboard piano’" style="zoom:50%;">
+
+<p>part of the code for our ‘keyboard piano’</p>
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/ECE391-MP3-Tutorial/" rel="prev" title="ECE391-MP3-Tutorial">
+      <i class="fa fa-chevron-left"></i> ECE391-MP3-Tutorial
+    </a></div>
+      <div class="post-nav-item">
+    <a href="/CrimeMap/" rel="next" title="CrimeMap">
+      CrimeMap <i class="fa fa-chevron-right"></i>
+    </a></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ZinixOS"><span class="nav-number">1.</span> <span class="nav-text">ZinixOS</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Show-case-of-our-OS"><span class="nav-number">1.1.</span> <span class="nav-text">Show case of our OS</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#Fixed-length-%E2%80%94-Slab-Cache"><span class="nav-number">1.1.1.</span> <span class="nav-text">Fixed length — Slab Cache</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Variable-length-%E2%80%94-Implicit-free-list"><span class="nav-number">1.1.2.</span> <span class="nav-text">Variable length — Implicit free list</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Signal"><span class="nav-number">1.2.</span> <span class="nav-text">Signal</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ATA-Hard-Disk-Support-amp-File-System"><span class="nav-number">1.3.</span> <span class="nav-text">ATA Hard Disk Support &amp; File System</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Speaker-Driver"><span class="nav-number">1.4.</span> <span class="nav-text">Speaker Driver</span></a></li></ol></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zicheng Ma</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">5</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ZichengMa" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ZichengMa" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/zma17@illinois.edu" title="E-Mail → zma17@illinois.edu"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zicheng Ma</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
