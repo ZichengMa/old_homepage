@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=2">
+<meta name="theme-color" content="#222">
+<meta name="generator" content="Hexo 6.3.0">
+  <link rel="apple-touch-icon" sizes="180x180" href="/images/apple-touch-icon-next.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/images/favicon-32x32-next.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/images/favicon-16x16-next.png">
+  <link rel="mask-icon" href="/images/logo.svg" color="#222">
+
+<link rel="stylesheet" href="/css/main.css">
+
+
+<link rel="stylesheet" href="/lib/font-awesome/css/all.min.css">
+
+<script id="hexo-configurations">
+    var NexT = window.NexT || {};
+    var CONFIG = {"hostname":"zichengma.github.io","root":"/","scheme":"Mist","version":"7.8.0","exturl":false,"sidebar":{"position":"left","width":250,"display":"post","padding":18,"offset":12,"onmobile":false},"copycode":{"enable":false,"show_result":false,"style":null},"back2top":{"enable":true,"sidebar":false,"scrollpercent":false},"bookmark":{"enable":false,"color":"#222","save":"auto"},"fancybox":false,"mediumzoom":false,"lazyload":false,"pangu":false,"comments":{"style":"tabs","active":null,"storage":true,"lazyload":false,"nav":null},"algolia":{"hits":{"per_page":10},"labels":{"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}},"localsearch":{"enable":false,"trigger":"auto","top_n_per_article":1,"unescape":false,"preload":false},"motion":{"enable":true,"async":false,"transition":{"post_block":"fadeIn","post_header":"slideDownIn","post_body":"slideDownIn","coll_header":"slideLeftIn","sidebar":"slideUpIn"}}};
+  </script>
+
+  <meta name="description" content="Introduction about k8s operator and a sample code of a very simple controller.">
+<meta property="og:type" content="article">
+<meta property="og:title" content="k8s operator practice">
+<meta property="og:url" content="https://zichengma.github.io/k8s-operator-practice/index.html">
+<meta property="og:site_name" content="Zicheng Ma&#39;s Blog">
+<meta property="og:description" content="Introduction about k8s operator and a sample code of a very simple controller.">
+<meta property="og:locale" content="en_US">
+<meta property="article:published_time" content="2023-03-27T01:28:15.000Z">
+<meta property="article:modified_time" content="2023-03-27T01:45:14.189Z">
+<meta property="article:author" content="Zicheng Ma">
+<meta name="twitter:card" content="summary">
+
+<link rel="canonical" href="https://zichengma.github.io/k8s-operator-practice/">
+
+
+<script id="page-configurations">
+  // https://hexo.io/docs/variables.html
+  CONFIG.page = {
+    sidebar: "",
+    isHome : false,
+    isPost : true,
+    lang   : 'en'
+  };
+</script>
+
+  <title>k8s operator practice | Zicheng Ma's Blog</title>
+  
+
+
+
+
+
+
+  <noscript>
+  <style>
+  .use-motion .brand,
+  .use-motion .menu-item,
+  .sidebar-inner,
+  .use-motion .post-block,
+  .use-motion .pagination,
+  .use-motion .comments,
+  .use-motion .post-header,
+  .use-motion .post-body,
+  .use-motion .collection-header { opacity: initial; }
+
+  .use-motion .site-title,
+  .use-motion .site-subtitle {
+    opacity: initial;
+    top: initial;
+  }
+
+  .use-motion .logo-line-before i { left: initial; }
+  .use-motion .logo-line-after i { right: initial; }
+  </style>
+</noscript>
+
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage">
+  <div class="container use-motion">
+    <div class="headband"></div>
+
+    <header class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-container">
+  <div class="site-nav-toggle">
+    <div class="toggle" aria-label="Toggle navigation bar">
+      <span class="toggle-line toggle-line-first"></span>
+      <span class="toggle-line toggle-line-middle"></span>
+      <span class="toggle-line toggle-line-last"></span>
+    </div>
+  </div>
+
+  <div class="site-meta">
+
+    <a href="/" class="brand" rel="start">
+      <span class="logo-line-before"><i></i></span>
+      <h1 class="site-title">Zicheng Ma's Blog</h1>
+      <span class="logo-line-after"><i></i></span>
+    </a>
+  </div>
+
+  <div class="site-nav-right">
+    <div class="toggle popup-trigger">
+    </div>
+  </div>
+</div>
+
+
+
+
+<nav class="site-nav">
+  <ul id="menu" class="main-menu menu">
+        <li class="menu-item menu-item-home">
+
+    <a href="/" rel="section"><i class="fa fa-home fa-fw"></i>Home</a>
+
+  </li>
+        <li class="menu-item menu-item-about">
+
+    <a href="/About-me" rel="section"><i class="fa fa-user fa-fw"></i>About</a>
+
+  </li>
+        <li class="menu-item menu-item-test">
+
+    <a href="/test-page" rel="section"><i class="fa fa-mask fa-fw"></i>Test</a>
+
+  </li>
+        <li class="menu-item menu-item-course_notes">
+
+    <a href="/CourseNotes" rel="section"><i class="fa fa-book-open fa-fw"></i>Course Notes</a>
+
+  </li>
+        <li class="menu-item menu-item-projects">
+
+    <a href="/Projects" rel="section"><i class="fa fa-code fa-fw"></i>Projects</a>
+
+  </li>
+        <li class="menu-item menu-item-archives">
+
+    <a href="/archives/" rel="section"><i class="fa fa-archive fa-fw"></i>Archives</a>
+
+  </li>
+  </ul>
+</nav>
+
+
+
+
+</div>
+    </header>
+
+    
+  <div class="back-to-top">
+    <i class="fa fa-arrow-up"></i>
+    <span>0%</span>
+  </div>
+
+
+    <main class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          
+
+          <div class="content post posts-expand">
+            
+
+    
+  
+  
+  <article itemscope itemtype="http://schema.org/Article" class="post-block" lang="en">
+    <link itemprop="mainEntityOfPage" href="https://zichengma.github.io/k8s-operator-practice/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="image" content="/images/avatar.gif">
+      <meta itemprop="name" content="Zicheng Ma">
+      <meta itemprop="description" content="">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Zicheng Ma's Blog">
+    </span>
+      <header class="post-header">
+        <h1 class="post-title" itemprop="name headline">
+          k8s operator practice
+        </h1>
+
+        <div class="post-meta">
+            <span class="post-meta-item">
+              <span class="post-meta-item-icon">
+                <i class="far fa-calendar"></i>
+              </span>
+              <span class="post-meta-item-text">Posted on</span>
+              
+
+              <time title="Created: 2023-03-26 20:28:15 / Modified: 20:45:14" itemprop="dateCreated datePublished" datetime="2023-03-26T20:28:15-05:00">2023-03-26</time>
+            </span>
+
+          
+            <div class="post-description">Introduction about k8s operator and a sample code of a very simple controller.</div>
+
+        </div>
+      </header>
+
+    
+    
+    
+    <div class="post-body" itemprop="articleBody">
+
+      
+        <p>I am learning how to write Kubernetes operator these days. This post is used to record some basic definition and a very good sample controller implemented by <a target="_blank" rel="noopener" href="http://workshop.coreostrain.me/lab/go-operator/podset/">RedHat</a>.</p>
+<h3 id="Introduction-to-Kubernetes-Operators"><a href="#Introduction-to-Kubernetes-Operators" class="headerlink" title="Introduction to Kubernetes Operators"></a>Introduction to Kubernetes Operators</h3><p>Kubernetes is a powerful platform for managing containerized applications at scale. While Kubernetes provides a robust set of primitives for deploying and managing applications, it can be challenging to build and manage complex applications using only these primitives. This is where Kubernetes Operators come in.</p>
+<p>An Operator is a method of packaging, deploying, and managing a Kubernetes application. Operators use custom resources, controllers, and reconciliation loops to automate the deployment and management of complex applications on Kubernetes. In this article, we will explore the concept of Operators in Kubernetes and dive into the details of building an Operator using Go.</p>
+<h3 id="Reconciler-Overview"><a href="#Reconciler-Overview" class="headerlink" title="Reconciler Overview"></a>Reconciler Overview</h3><p>One of the key components of a Kubernetes Operator is the reconciler. The reconciler is responsible for comparing the desired state of a Kubernetes resource with its current state and taking actions to reconcile any differences between the two.</p>
+<p>In Go-based Kubernetes Operators, the reconciler is typically implemented as a controller. The controller watches for changes to a specific type of Kubernetes resource, and when a change is detected, it initiates a reconciliation loop. During the reconciliation loop, the controller retrieves the current state of the resource from the Kubernetes API server, compares it with the desired state, and takes actions to reconcile any differences.</p>
+<h3 id="Code-analysis"><a href="#Code-analysis" class="headerlink" title="Code analysis"></a>Code analysis</h3><p>The CRDs we defined is PodSet.<br>    Spec: Replicas(How many pods we want)<br>    Status: ReadyReplicas(The number of ready replicas)   PodNames(A slice for all ready replicas name)<br>Controller will try to update Status.ReadyReplicas &#x3D; Spec.Replicas and up&#x2F;down scaling pods based on the difference.</p>
+<figure class="highlight go"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br><span class="line">33</span><br><span class="line">34</span><br><span class="line">35</span><br><span class="line">36</span><br><span class="line">37</span><br><span class="line">38</span><br><span class="line">39</span><br><span class="line">40</span><br><span class="line">41</span><br><span class="line">42</span><br><span class="line">43</span><br><span class="line">44</span><br><span class="line">45</span><br><span class="line">46</span><br><span class="line">47</span><br><span class="line">48</span><br><span class="line">49</span><br><span class="line">50</span><br><span class="line">51</span><br><span class="line">52</span><br><span class="line">53</span><br><span class="line">54</span><br><span class="line">55</span><br><span class="line">56</span><br><span class="line">57</span><br><span class="line">58</span><br><span class="line">59</span><br><span class="line">60</span><br><span class="line">61</span><br><span class="line">62</span><br><span class="line">63</span><br><span class="line">64</span><br><span class="line">65</span><br><span class="line">66</span><br><span class="line">67</span><br><span class="line">68</span><br><span class="line">69</span><br><span class="line">70</span><br><span class="line">71</span><br><span class="line">72</span><br><span class="line">73</span><br><span class="line">74</span><br><span class="line">75</span><br><span class="line">76</span><br><span class="line">77</span><br><span class="line">78</span><br><span class="line">79</span><br><span class="line">80</span><br><span class="line">81</span><br><span class="line">82</span><br><span class="line">83</span><br><span class="line">84</span><br><span class="line">85</span><br><span class="line">86</span><br><span class="line">87</span><br><span class="line">88</span><br><span class="line">89</span><br><span class="line">90</span><br><span class="line">91</span><br><span class="line">92</span><br><span class="line">93</span><br><span class="line">94</span><br><span class="line">95</span><br><span class="line">96</span><br><span class="line">97</span><br><span class="line">98</span><br><span class="line">99</span><br><span class="line">100</span><br><span class="line">101</span><br><span class="line">102</span><br><span class="line">103</span><br><span class="line">104</span><br><span class="line">105</span><br><span class="line">106</span><br><span class="line">107</span><br><span class="line">108</span><br><span class="line">109</span><br><span class="line">110</span><br><span class="line">111</span><br><span class="line">112</span><br><span class="line">113</span><br><span class="line">114</span><br><span class="line">115</span><br><span class="line">116</span><br><span class="line">117</span><br><span class="line">118</span><br><span class="line">119</span><br><span class="line">120</span><br><span class="line">121</span><br><span class="line">122</span><br><span class="line">123</span><br><span class="line">124</span><br><span class="line">125</span><br><span class="line">126</span><br><span class="line">127</span><br><span class="line">128</span><br><span class="line">129</span><br><span class="line">130</span><br><span class="line">131</span><br><span class="line">132</span><br><span class="line">133</span><br><span class="line">134</span><br><span class="line">135</span><br><span class="line">136</span><br><span class="line">137</span><br><span class="line">138</span><br><span class="line">139</span><br><span class="line">140</span><br><span class="line">141</span><br><span class="line">142</span><br><span class="line">143</span><br><span class="line">144</span><br><span class="line">145</span><br><span class="line">146</span><br><span class="line">147</span><br><span class="line">148</span><br><span class="line">149</span><br><span class="line">150</span><br><span class="line">151</span><br><span class="line">152</span><br><span class="line">153</span><br><span class="line">154</span><br><span class="line">155</span><br><span class="line">156</span><br><span class="line">157</span><br><span class="line">158</span><br><span class="line">159</span><br><span class="line">160</span><br><span class="line">161</span><br><span class="line">162</span><br><span class="line">163</span><br><span class="line">164</span><br><span class="line">165</span><br><span class="line">166</span><br><span class="line">167</span><br><span class="line">168</span><br><span class="line">169</span><br><span class="line">170</span><br><span class="line">171</span><br><span class="line">172</span><br><span class="line">173</span><br><span class="line">174</span><br><span class="line">175</span><br><span class="line">176</span><br><span class="line">177</span><br><span class="line">178</span><br><span class="line">179</span><br><span class="line">180</span><br><span class="line">181</span><br><span class="line">182</span><br><span class="line">183</span><br><span class="line">184</span><br><span class="line">185</span><br><span class="line">186</span><br><span class="line">187</span><br><span class="line">188</span><br><span class="line">189</span><br><span class="line">190</span><br><span class="line">191</span><br><span class="line">192</span><br><span class="line">193</span><br><span class="line">194</span><br><span class="line">195</span><br><span class="line">196</span><br><span class="line">197</span><br><span class="line">198</span><br><span class="line">199</span><br><span class="line">200</span><br><span class="line">201</span><br><span class="line">202</span><br><span class="line">203</span><br><span class="line">204</span><br><span class="line">205</span><br><span class="line">206</span><br><span class="line">207</span><br><span class="line">208</span><br><span class="line">209</span><br><span class="line">210</span><br></pre></td><td class="code"><pre><span class="line"><span class="comment">/*</span></span><br><span class="line"><span class="comment">Copyright 2023.</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">Licensed under the Apache License, Version 2.0 (the &quot;License&quot;);</span></span><br><span class="line"><span class="comment">you may not use this file except in compliance with the License.</span></span><br><span class="line"><span class="comment">You may obtain a copy of the License at</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">    http://www.apache.org/licenses/LICENSE-2.0</span></span><br><span class="line"><span class="comment"></span></span><br><span class="line"><span class="comment">Unless required by applicable law or agreed to in writing, software</span></span><br><span class="line"><span class="comment">distributed under the License is distributed on an &quot;AS IS&quot; BASIS,</span></span><br><span class="line"><span class="comment">WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.</span></span><br><span class="line"><span class="comment">See the License for the specific language governing permissions and</span></span><br><span class="line"><span class="comment">limitations under the License.</span></span><br><span class="line"><span class="comment">*/</span></span><br><span class="line"></span><br><span class="line"><span class="keyword">package</span> controllers</span><br><span class="line"></span><br><span class="line"><span class="keyword">import</span> (</span><br><span class="line">	<span class="string">&quot;context&quot;</span></span><br><span class="line">	<span class="string">&quot;reflect&quot;</span></span><br><span class="line"></span><br><span class="line">	corev1 <span class="string">&quot;k8s.io/api/core/v1&quot;</span></span><br><span class="line">	<span class="string">&quot;k8s.io/apimachinery/pkg/api/errors&quot;</span></span><br><span class="line">	metav1 <span class="string">&quot;k8s.io/apimachinery/pkg/apis/meta/v1&quot;</span></span><br><span class="line">	<span class="string">&quot;k8s.io/apimachinery/pkg/labels&quot;</span></span><br><span class="line">	<span class="string">&quot;k8s.io/apimachinery/pkg/runtime&quot;</span></span><br><span class="line">	ctrl <span class="string">&quot;sigs.k8s.io/controller-runtime&quot;</span></span><br><span class="line">	<span class="string">&quot;sigs.k8s.io/controller-runtime/pkg/client&quot;</span></span><br><span class="line">	<span class="string">&quot;sigs.k8s.io/controller-runtime/pkg/controller/controllerutil&quot;</span></span><br><span class="line">	<span class="string">&quot;sigs.k8s.io/controller-runtime/pkg/log&quot;</span></span><br><span class="line"></span><br><span class="line">	batchv1 <span class="string">&quot;tutorial.kubebuilder.io/operator-practice/api/v1&quot;</span></span><br><span class="line">)</span><br><span class="line"></span><br><span class="line"><span class="comment">// PodSetReconciler reconciles a PodSet object</span></span><br><span class="line"><span class="keyword">type</span> PodSetReconciler <span class="keyword">struct</span> &#123;</span><br><span class="line">	client.Client</span><br><span class="line">	Scheme *runtime.Scheme</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">//+kubebuilder:rbac:groups=batch.tutorial.kubebuilder.io,resources=podsets,verbs=get;list;watch;create;update;patch;delete</span></span><br><span class="line"><span class="comment">//+kubebuilder:rbac:groups=batch.tutorial.kubebuilder.io,resources=podsets/status,verbs=get;update;patch</span></span><br><span class="line"><span class="comment">//+kubebuilder:rbac:groups=batch.tutorial.kubebuilder.io,resources=podsets/finalizers,verbs=update</span></span><br><span class="line"></span><br><span class="line"><span class="comment">// Reconcile is part of the main kubernetes reconciliation loop which aims to</span></span><br><span class="line"><span class="comment">// move the current state of the cluster closer to the desired state.</span></span><br><span class="line"><span class="comment">// TODO(user): Modify the Reconcile function to compare the state specified by</span></span><br><span class="line"><span class="comment">// the PodSet object against the actual cluster state, and then</span></span><br><span class="line"><span class="comment">// perform operations to make the cluster state reflect the state specified by</span></span><br><span class="line"><span class="comment">// the user.</span></span><br><span class="line"><span class="comment">//</span></span><br><span class="line"><span class="comment">// For more details, check Reconcile and its Result here:</span></span><br><span class="line"><span class="comment">// - https://pkg.go.dev/sigs.k8s.io/controller-runtime@v0.14.1/pkg/reconcile</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *PodSetReconciler)</span></span> Reconcile(ctx context.Context, req ctrl.Request) (ctrl.Result, <span class="type">error</span>) &#123;</span><br><span class="line">	log := log.FromContext(ctx)</span><br><span class="line"></span><br><span class="line">	<span class="comment">// TODO(user): your logic here</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// listen to the creation of PodSet objects</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// fetch the PodSet object</span></span><br><span class="line">	podset := &amp;batchv1.PodSet&#123;&#125;</span><br><span class="line">	err := r.Get(context.TODO(), req.NamespacedName, podset) <span class="comment">// get the PodSet object from the API server by its name and namespace and store it in the podset variable</span></span><br><span class="line">	<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">if</span> errors.IsNotFound(err) &#123;</span><br><span class="line">			<span class="comment">// Request object not found, could have been deleted after reconcile request.</span></span><br><span class="line">			<span class="comment">// Owned objects are automatically garbage collected. For additional cleanup logic use finalizers.</span></span><br><span class="line">			<span class="comment">// Return and don&#x27;t requeue</span></span><br><span class="line">			<span class="keyword">return</span> ctrl.Result&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// Error reading the object - requeue the request.</span></span><br><span class="line">		<span class="comment">// If the error is not a NotFound error, the second if statement is triggered, and the controller</span></span><br><span class="line">		<span class="comment">// returns a ctrl.Result&#123;&#125; along with the original error to requeue the request for reconciliation.</span></span><br><span class="line">		<span class="comment">// This is done to allow the controller to retry the operation at a later time, in case the error was temporary or transient.</span></span><br><span class="line">		<span class="keyword">return</span> ctrl.Result&#123;&#125;, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	podList := &amp;corev1.PodList&#123;&#125; <span class="comment">// create a new list of pods not podsets!</span></span><br><span class="line">	<span class="comment">// The lbs variable is a map of labels that will be used to filter the list of pods. In this case, the labels are set to app=podset.Name and version=v0.1.</span></span><br><span class="line">	<span class="comment">// This means that the query will only return pods that have the app label set to the name of the podset object and the version label set to v0.1.</span></span><br><span class="line">	lbs := <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>&#123;</span><br><span class="line">		<span class="string">&quot;app&quot;</span>:     podset.Name,</span><br><span class="line">		<span class="string">&quot;version&quot;</span>: <span class="string">&quot;v0.1&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	labelSelector := labels.SelectorFromSet(lbs) <span class="comment">// create a label selector from the lbs map</span></span><br><span class="line">	<span class="comment">// the listOps variable is a client.ListOptions object that contains the options for querying the Kubernetes API server.</span></span><br><span class="line">	listOps := &amp;client.ListOptions&#123;Namespace: podset.Namespace, LabelSelector: labelSelector&#125; <span class="comment">// create a list options object with the namespace and label selector</span></span><br><span class="line">	<span class="keyword">if</span> err = r.List(context.TODO(), podList, listOps); err != <span class="literal">nil</span> &#123;</span><br><span class="line">		<span class="keyword">return</span> ctrl.Result&#123;&#125;, err</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Count the pods that are pending or running as available</span></span><br><span class="line">	<span class="keyword">var</span> available []corev1.Pod</span><br><span class="line">	<span class="keyword">for</span> _, pod := <span class="keyword">range</span> podList.Items &#123;</span><br><span class="line">		<span class="comment">// For each pod, it first checks whether the DeletionTimestamp field is set.</span></span><br><span class="line">		<span class="comment">// If it is, this means that the pod is scheduled for deletion, and the code skips it</span></span><br><span class="line">		<span class="keyword">if</span> pod.ObjectMeta.DeletionTimestamp != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">continue</span></span><br><span class="line">		&#125;</span><br><span class="line">		<span class="comment">// If the pod is not scheduled for deletion, then check whether the pod&#x27;s Status.Phase field is set to either corev1.PodRunning or corev1.PodPending.</span></span><br><span class="line">		<span class="comment">// If the pod is in one of these states, it is considered available, and its reference is added to the available slice.</span></span><br><span class="line">		<span class="keyword">if</span> pod.Status.Phase == corev1.PodRunning || pod.Status.Phase == corev1.PodPending &#123;</span><br><span class="line">			available = <span class="built_in">append</span>(available, pod)</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line">	numAvailable := <span class="type">int32</span>(<span class="built_in">len</span>(available)) <span class="comment">// get the number of available pods</span></span><br><span class="line"></span><br><span class="line">	<span class="comment">// This code block creates a new slice of strings called availableNames,</span></span><br><span class="line">	<span class="comment">// which contains the names of all the available pods returned by the previous code block.</span></span><br><span class="line">	availableNames := []<span class="type">string</span>&#123;&#125;</span><br><span class="line">	<span class="keyword">for</span> _, pod := <span class="keyword">range</span> available &#123;</span><br><span class="line">		availableNames = <span class="built_in">append</span>(availableNames, pod.ObjectMeta.Name)</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Update the status if necessary</span></span><br><span class="line">	status := batchv1.PodSetStatus&#123;</span><br><span class="line">		PodNames:      availableNames,</span><br><span class="line">		ReadyReplicas: numAvailable,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="comment">// The code first checks whether the podset.Status field is equal to the new status value using the reflect.DeepEqual() function.</span></span><br><span class="line">	<span class="comment">// If the two values are not equal, it means that the status value has been updated and needs to be written back to the Kubernetes API server.</span></span><br><span class="line">	<span class="keyword">if</span> !reflect.DeepEqual(podset.Status, status) &#123;</span><br><span class="line">		podset.Status = status</span><br><span class="line">		err = r.Status().Update(context.TODO(), podset)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			log.Error(err, <span class="string">&quot;Failed to update PodSet status&quot;</span>)</span><br><span class="line">			<span class="keyword">return</span> ctrl.Result&#123;&#125;, err</span><br><span class="line">		&#125;</span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> numAvailable == podset.Spec.Replicas &#123;</span><br><span class="line">		<span class="comment">// If the number of available pods is equal to the number of replicas specified in the podset.Spec.Replicas field,</span></span><br><span class="line">		<span class="comment">// then the controller returns a ctrl.Result&#123;&#125; object without an error to indicate that the reconciliation is complete.</span></span><br><span class="line">		<span class="keyword">return</span> ctrl.Result&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="comment">// Scale up or down</span></span><br><span class="line">	<span class="keyword">if</span> numAvailable &gt; podset.Spec.Replicas &#123;</span><br><span class="line">		log.Info(<span class="string">&quot;Scaling down pods&quot;</span>, <span class="string">&quot;Currently available&quot;</span>, numAvailable, <span class="string">&quot;Required replicas&quot;</span>, podset.Spec.Replicas)</span><br><span class="line">		diff := numAvailable - podset.Spec.Replicas</span><br><span class="line">		dpods := available[:diff]</span><br><span class="line">		<span class="keyword">for</span> _, dpod := <span class="keyword">range</span> dpods &#123;</span><br><span class="line">			err = r.Delete(context.TODO(), &amp;dpod) <span class="comment">// Writer interface --&gt; Create Delete Update ...</span></span><br><span class="line">			<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">				log.Error(err, <span class="string">&quot;Failed to delete pod&quot;</span>, <span class="string">&quot;pod.name&quot;</span>, dpod.Name)</span><br><span class="line">				<span class="keyword">return</span> ctrl.Result&#123;&#125;, err</span><br><span class="line">			&#125;</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> ctrl.Result&#123;Requeue: <span class="literal">true</span>&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line"></span><br><span class="line">	<span class="keyword">if</span> numAvailable &lt; podset.Spec.Replicas &#123;</span><br><span class="line">		log.Info(<span class="string">&quot;Scaling up pods&quot;</span>, <span class="string">&quot;Currently available&quot;</span>, numAvailable, <span class="string">&quot;Required replicas&quot;</span>, podset.Spec.Replicas)</span><br><span class="line">		<span class="comment">// Define a new Pod object</span></span><br><span class="line">		pod := newPodForCR(podset)</span><br><span class="line">		<span class="comment">// Set PodSet instance as the owner and controller</span></span><br><span class="line">		<span class="comment">// This ensures that the new pod is &quot;owned&quot; by the PodSet object and is managed by the controller.</span></span><br><span class="line">		<span class="comment">// When a child object is created, it is important to set a reference to its owner object using the SetControllerReference function.</span></span><br><span class="line">		<span class="comment">// This ensures that the owner object is set as the &quot;controller&quot; of the child object,</span></span><br><span class="line">		<span class="comment">// which allows Kubernetes to automatically manage the child object&#x27;s lifecycle and ensures that it is deleted when the owner object is deleted.</span></span><br><span class="line">		<span class="keyword">if</span> err := controllerutil.SetControllerReference(podset, pod, r.Scheme); err != <span class="literal">nil</span> &#123;</span><br><span class="line">			<span class="keyword">return</span> ctrl.Result&#123;&#125;, err</span><br><span class="line">		&#125;</span><br><span class="line">		err = r.Create(context.TODO(), pod)</span><br><span class="line">		<span class="keyword">if</span> err != <span class="literal">nil</span> &#123;</span><br><span class="line">			log.Error(err, <span class="string">&quot;Failed to create pod&quot;</span>, <span class="string">&quot;pod.name&quot;</span>, pod.Name)</span><br><span class="line">			<span class="keyword">return</span> ctrl.Result&#123;&#125;, err</span><br><span class="line">		&#125;</span><br><span class="line">		<span class="keyword">return</span> ctrl.Result&#123;Requeue: <span class="literal">true</span>&#125;, <span class="literal">nil</span></span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> ctrl.Result&#123;&#125;, <span class="literal">nil</span></span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// <span class="doctag">TODO:</span> Add a function called newPodForCR() that creates a new pod object for the podset object passed as an argument.</span></span><br><span class="line"><span class="comment">// args: podset *batchv1.PodSet</span></span><br><span class="line"><span class="comment">// newPodForCR returns a busybox pod with the same name/namespace as the cr</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="title">newPodForCR</span><span class="params">(cr *batchv1.PodSet)</span></span> *corev1.Pod &#123;</span><br><span class="line">	<span class="comment">// creates a map of labels called labels, which contains two key-value pairs:</span></span><br><span class="line">	<span class="comment">// app set to the name of the PodSet object, and version set to &quot;v0.1&quot;.</span></span><br><span class="line">	<span class="comment">// These labels are used to identify the pods created by the PodSet object.</span></span><br><span class="line">	labels := <span class="keyword">map</span>[<span class="type">string</span>]<span class="type">string</span>&#123;</span><br><span class="line">		<span class="string">&quot;app&quot;</span>:     cr.Name,</span><br><span class="line">		<span class="string">&quot;version&quot;</span>: <span class="string">&quot;v0.1&quot;</span>,</span><br><span class="line">	&#125;</span><br><span class="line">	<span class="keyword">return</span> &amp;corev1.Pod&#123;</span><br><span class="line">		ObjectMeta: metav1.ObjectMeta&#123;</span><br><span class="line">			GenerateName: cr.Name + <span class="string">&quot;-pod-&quot;</span>, <span class="comment">// GenerateName is used to generate a unique name for the pod.</span></span><br><span class="line">			Namespace:    cr.Namespace,</span><br><span class="line">			Labels:       labels,</span><br><span class="line">		&#125;,</span><br><span class="line">		Spec: corev1.PodSpec&#123;</span><br><span class="line">			Containers: []corev1.Container&#123;</span><br><span class="line">				&#123;</span><br><span class="line">					Name:    <span class="string">&quot;busybox&quot;</span>,</span><br><span class="line">					Image:   <span class="string">&quot;busybox&quot;</span>,</span><br><span class="line">					Command: []<span class="type">string</span>&#123;<span class="string">&quot;sleep&quot;</span>, <span class="string">&quot;3600&quot;</span>&#125;,</span><br><span class="line">				&#125;,</span><br><span class="line">			&#125;,</span><br><span class="line">		&#125;,</span><br><span class="line">	&#125;</span><br><span class="line">&#125;</span><br><span class="line"></span><br><span class="line"><span class="comment">// SetupWithManager sets up the controller with the Manager.</span></span><br><span class="line"><span class="function"><span class="keyword">func</span> <span class="params">(r *PodSetReconciler)</span></span> SetupWithManager(mgr ctrl.Manager) <span class="type">error</span> &#123;</span><br><span class="line">	<span class="keyword">return</span> ctrl.NewControllerManagedBy(mgr).</span><br><span class="line">		For(&amp;batchv1.PodSet&#123;&#125;).</span><br><span class="line">		Complete(r)</span><br><span class="line">&#125;</span><br><span class="line"></span><br></pre></td></tr></table></figure>
+
+
+    </div>
+
+    
+    
+    
+
+      <footer class="post-footer">
+
+        
+
+
+        
+    <div class="post-nav">
+      <div class="post-nav-item">
+    <a href="/MedicalDB/" rel="prev" title="MedicalDB">
+      <i class="fa fa-chevron-left"></i> MedicalDB
+    </a></div>
+      <div class="post-nav-item"></div>
+    </div>
+      </footer>
+    
+  </article>
+  
+  
+  
+
+
+
+          </div>
+          
+
+<script>
+  window.addEventListener('tabs:register', () => {
+    let { activeClass } = CONFIG.comments;
+    if (CONFIG.comments.storage) {
+      activeClass = localStorage.getItem('comments_active') || activeClass;
+    }
+    if (activeClass) {
+      let activeTab = document.querySelector(`a[href="#comment-${activeClass}"]`);
+      if (activeTab) {
+        activeTab.click();
+      }
+    }
+  });
+  if (CONFIG.comments.storage) {
+    window.addEventListener('tabs:click', event => {
+      if (!event.target.matches('.tabs-comment .tab-content .tab-pane')) return;
+      let commentClass = event.target.classList[1];
+      localStorage.setItem('comments_active', commentClass);
+    });
+  }
+</script>
+
+        </div>
+          
+  
+  <div class="toggle sidebar-toggle">
+    <span class="toggle-line toggle-line-first"></span>
+    <span class="toggle-line toggle-line-middle"></span>
+    <span class="toggle-line toggle-line-last"></span>
+  </div>
+
+  <aside class="sidebar">
+    <div class="sidebar-inner">
+
+      <ul class="sidebar-nav motion-element">
+        <li class="sidebar-nav-toc">
+          Table of Contents
+        </li>
+        <li class="sidebar-nav-overview">
+          Overview
+        </li>
+      </ul>
+
+      <!--noindex-->
+      <div class="post-toc-wrap sidebar-panel">
+          <div class="post-toc motion-element"><ol class="nav"><li class="nav-item nav-level-3"><a class="nav-link" href="#Introduction-to-Kubernetes-Operators"><span class="nav-number">1.</span> <span class="nav-text">Introduction to Kubernetes Operators</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Reconciler-Overview"><span class="nav-number">2.</span> <span class="nav-text">Reconciler Overview</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#Code-analysis"><span class="nav-number">3.</span> <span class="nav-text">Code analysis</span></a></li></ol></div>
+      </div>
+      <!--/noindex-->
+
+      <div class="site-overview-wrap sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+  <p class="site-author-name" itemprop="name">Zicheng Ma</p>
+  <div class="site-description" itemprop="description"></div>
+</div>
+<div class="site-state-wrap motion-element">
+  <nav class="site-state">
+      <div class="site-state-item site-state-posts">
+          <a href="/archives/">
+        
+          <span class="site-state-item-count">6</span>
+          <span class="site-state-item-name">posts</span>
+        </a>
+      </div>
+      <div class="site-state-item site-state-tags">
+        <span class="site-state-item-count">1</span>
+        <span class="site-state-item-name">tags</span>
+      </div>
+  </nav>
+</div>
+  <div class="links-of-author motion-element">
+      <span class="links-of-author-item">
+        <a href="https://github.com/ZichengMa" title="GitHub → https:&#x2F;&#x2F;github.com&#x2F;ZichengMa" rel="noopener" target="_blank"><i class="fab fa-github fa-fw"></i>GitHub</a>
+      </span>
+      <span class="links-of-author-item">
+        <a href="/zma17@illinois.edu" title="E-Mail → zma17@illinois.edu"><i class="fa fa-envelope fa-fw"></i>E-Mail</a>
+      </span>
+  </div>
+
+
+  <div class="links-of-blogroll motion-element">
+    <div class="links-of-blogroll-title"><i class="fa fa-link fa-fw"></i>
+      Friend Links
+    </div>
+    <ul class="links-of-blogroll-list">
+        <li class="links-of-blogroll-item">
+          <a href="https://silkrow3.wordpress.com/" title="https:&#x2F;&#x2F;silkrow3.wordpress.com&#x2F;" rel="noopener" target="_blank">ErkaiYu</a>
+        </li>
+        <li class="links-of-blogroll-item">
+          <a href="https://moomoohorse.com/home/" title="https:&#x2F;&#x2F;moomoohorse.com&#x2F;home&#x2F;" rel="noopener" target="_blank">HaoRen</a>
+        </li>
+    </ul>
+  </div>
+
+      </div>
+
+    </div>
+  </aside>
+  <div id="sidebar-dimmer"></div>
+
+
+      </div>
+    </main>
+
+    <footer class="footer">
+      <div class="footer-inner">
+        
+
+        
+
+<div class="copyright">
+  
+  &copy; 
+  <span itemprop="copyrightYear">2023</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">Zicheng Ma</span>
+</div>
+  <div class="powered-by">Powered by <a href="https://hexo.io/" class="theme-link" rel="noopener" target="_blank">Hexo</a> & <a href="https://mist.theme-next.org/" class="theme-link" rel="noopener" target="_blank">NexT.Mist</a>
+  </div>
+
+        
+
+
+
+
+
+
+
+
+      </div>
+    </footer>
+  </div>
+
+  
+  <script src="/lib/anime.min.js"></script>
+  <script src="/lib/velocity/velocity.min.js"></script>
+  <script src="/lib/velocity/velocity.ui.min.js"></script>
+
+<script src="/js/utils.js"></script>
+
+<script src="/js/motion.js"></script>
+
+
+<script src="/js/schemes/muse.js"></script>
+
+
+<script src="/js/next-boot.js"></script>
+
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+
+  
+
+</body>
+</html>
